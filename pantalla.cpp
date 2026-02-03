@@ -121,7 +121,7 @@ void pantalla_touch(TFT_eSPI &tft, XPT2046_Bitbang &touch) {
   TouchPoint toque = touch.getTouch();
 
   // Display touches that have a pressure value (Z)
-  if (toque.zRaw >= 2800) {
+  if (toque.zRaw >= 1000) {
     tft.setTextSize(1);
     tft.setCursor(10, 310);
     tft.print("x: ");
