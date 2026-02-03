@@ -1,4 +1,4 @@
-#include <cstdlib>
+#include <Arduino.h>
 #include "pantalla.h"
 #include "icons.h"
 
@@ -31,6 +31,14 @@ void pantalla_bandera(TFT_eSPI &tft, int x, int y, int tamanio) {
   tft.fillRect(x, y, w, banda, TFT_CYAN);
   tft.fillRect(x, y + banda, w, banda, TFT_WHITE);
   tft.fillRect(x, y + 2 * banda, w, banda, TFT_CYAN);
+}
+
+void pantalla_icono_sd(TFT_eSPI &tft, bool estado) {
+  if (estado) {
+    tft.drawBitmap(208, 0, sd_icon, 32, 32, TFT_BLACK, TFT_GREEN);
+  } else {
+    tft.drawBitmap(208, 0, sd_icon, 32, 32, TFT_BLACK, TFT_RED);
+  }
 }
 
 
