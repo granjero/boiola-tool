@@ -1,5 +1,7 @@
 #include <Arduino.h>
 #include <HardwareSerial.h>
+#include <Chrono.h>
+// #include <TJpg_Decoder.h>
 
 #define TOUCH_CLK 25
 #define TOUCH_MOSI 32
@@ -20,60 +22,55 @@ XPT2046_Bitbang touch(TOUCH_MOSI, TOUCH_MISO, TOUCH_CLK, TOUCH_CS);
 TFT_eSPI tft = TFT_eSPI();
 TinyGPSPlus gps;
 HardwareSerial gpsSerial(1);
+Chrono sd_write_interval(Chrono::SECONDS);
 
 bool estado_pantalla = true;
 bool estado_sd = false;
 
-String dataBuffer;
-File myFile;
-const char filename[] = "/boiolaTool.boot";
+File archivo;
+
+char filename[32] = "/boiola.boot";
 
 void setup() {
   pantalla_init(tft);                                         // inicia la pantalla
-  pantalla_setup(tft, TFT_PURPLE);                            // setup borde
-  pantalla_bandera(tft, 0, 0, 5);                             // bandera
   touch.begin();                                              // inicia el touch
-  gpsSerial.begin(9600, SERIAL_8N1, GPS_RX_PIN, GPS_TX_PIN);  // HardwareSerial GPS
-
-  estado_sd = sd_init();  // intenta iniciar la sd
-  pantalla_icono_sd(tft, estado_sd);
+  gpsSerial.begin(9600, SERIAL_8N1, GPS_RX_PIN, GPS_TX_PIN);  // inicia HardwareSerial GPS
+  estado_sd = sd_init();                                      // intenta iniciar la sd
 
   if (estado_sd) {
-    myFile = SD.open(filename, FILE_APPEND, true);
-    if (!myFile) {
-      tft.setCursor(10, 100);
-      tft.println("error opening: ");
-      tft.println(filename);
-      // while (true);
+    File archivo = SD.open(filename, FILE_APPEND, true);
+    if (archivo) {
+      archivo.print("boot;");
+      archivo.close();
     }
-    myFile.print("boot;");
-    myFile.close();
+    pantalla_img_jpg(tft, TJpgDec);  // imagen
+    delay(10000);
   }
+
+  pantalla_setup(tft, TFT_PURPLE);  // setup borde
+  pantalla_bandera(tft, 0, 0, 5);   // bandera
+  pantalla_icono_sd(tft, estado_sd);
 }
 
 
 void loop() {
-
+  // data GPS
   while (gpsSerial.available()) {
     gps.encode(gpsSerial.read());
   }
 
-  if (gps.location.isUpdated()) {
+  if (gps.location.isUpdated() && gps.location.isValid()) {
     pantalla_fecha(tft, gps);
     pantalla_gps(tft, gps, 60);
+  }
 
-    if (estado_sd) {
-      myFile = SD.open(filename, FILE_APPEND, true);
-      char buf[64];
-      snprintf(buf, sizeof(buf),
-               "%02d:%02d:%02d,%.6f,%.6f\n",
-               gps.time.hour(),
-               gps.time.minute(),
-               gps.time.second(),
-               gps.location.lat(),
-               gps.location.lng());
-      myFile.print(buf);
-      myFile.close();
+  if (estado_sd && sd_write_interval.hasPassed(10)) {
+    sd_write_interval.restart();
+    sd_set_filename(gps, filename, sizeof(filename));
+    if (!SD.exists(filename)) {
+      sd_file_encabezado(filename);
+    } else {
+      sd_file_append_gps_point(filename, gps);
     }
   }
 

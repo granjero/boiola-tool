@@ -2,6 +2,7 @@
 #include "pantalla.h"
 #include "icons.h"
 
+extern TFT_eSPI tft;
 
 void pantalla_init(TFT_eSPI &tft) {
   tft.init();
@@ -11,6 +12,7 @@ void pantalla_init(TFT_eSPI &tft) {
 
 void pantalla_setup(TFT_eSPI &tft, uint16_t color) {
   tft.fillScreen(TFT_BLACK);
+  tft.setTextWrap(false);
   tft.setTextSize(2);
   int16_t w = tft.width();
   int16_t h = tft.height();
@@ -84,25 +86,17 @@ void pantalla_gps(TFT_eSPI &tft, TinyGPSPlus &gps, int y) {
 
   if (hdop <= 1) {
     tft.drawBitmap(176, 0, gps_icon, 32, 32, TFT_BLACK, TFT_GREEN);
-    // tft.setTextColor(TFT_GREEN, TFT_BLACK);
   } else if (hdop <= 2) {
     tft.drawBitmap(176, 0, gps_icon, 32, 32, TFT_BLACK, TFT_YELLOW);
-    // tft.setTextColor(TFT_YELLOW, TFT_BLACK);
   } else if (hdop < 5) {
     tft.drawBitmap(176, 0, gps_icon, 32, 32, TFT_BLACK, TFT_ORANGE);
-    // tft.setTextColor(TFT_ORANGE, TFT_BLACK);
   } else {
     tft.drawBitmap(176, 0, gps_icon, 32, 32, TFT_BLACK, TFT_RED);
-    // tft.setTextColor(TFT_RED, TFT_BLACK);
   }
-
-  // tft.printf("%d   ", gps.satellites.value());
-  // tft.setTextColor(TFT_BLUE, TFT_BLACK);
-
   tft.setTextSize(4);
   // Speed
   tft.setCursor(X, Y + 60);
-  tft.printf("%.1f kph   ", gps.speed.kmph());
+  tft.printf("%.1f kph ", gps.speed.kmph());
 }
 
 
@@ -132,4 +126,23 @@ void pantalla_touch(TFT_eSPI &tft, XPT2046_Bitbang &touch) {
     tft.print(toque.zRaw);
     tft.print("     ");
   }
+}
+
+
+
+void pantalla_img_jpg(TFT_eSPI &tft, TJpg_Decoder &tjpj) {
+
+  tft.setSwapBytes(true);  // We need to swap the colour bytes (endianess)
+  TJpgDec.setJpgScale(1);
+  TJpgDec.setCallback(pantalla_jpg_output);
+  TJpgDec.drawSdJpg(0, 0, "/pics/boiola.jpg");
+  tft.setTextColor(TFT_WHITE, TFT_BLACK);
+  tft.setCursor(15, 310);
+  tft.print("boiola-tool v0.1");
+}
+
+bool pantalla_jpg_output(int16_t x, int16_t y, uint16_t w, uint16_t h, uint16_t *bitmap) {
+  if (y >= tft.height()) return false;
+  tft.pushImage(x, y, w, h, bitmap);
+  return true;
 }

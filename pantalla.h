@@ -5,6 +5,7 @@
 #include <TFT_eSPI.h>
 #include <TinyGPSPlus.h>
 #include <XPT2046_Bitbang.h>
+#include <TJpg_Decoder.h>
 
 // -----------------
 //PANTALLA
@@ -16,7 +17,9 @@ void pantalla_setup(TFT_eSPI &tft, uint16_t color);
 void pantalla_bandera(TFT_eSPI &tft, int x, int y, int tamanio);
 // icono sd
 void pantalla_icono_sd(TFT_eSPI &tft, bool estado);
-
+// imagen jpg
+void pantalla_img_jpg(TFT_eSPI &tft, TJpg_Decoder &tjpj);
+bool pantalla_jpg_output(int16_t x, int16_t y, uint16_t w, uint16_t h, uint16_t *bitmap);
 
 // -----------------
 // TOUCH
