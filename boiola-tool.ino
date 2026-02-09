@@ -16,6 +16,7 @@
 
 #include "pantalla.h"
 #include "boiola_sd.h"
+#include "boiola_web.h"
 // #include "icons.h"
 
 XPT2046_Bitbang touch(TOUCH_MOSI, TOUCH_MISO, TOUCH_CLK, TOUCH_CS);
@@ -23,6 +24,8 @@ TFT_eSPI tft = TFT_eSPI();
 TinyGPSPlus gps;
 HardwareSerial gpsSerial(1);
 Chrono sd_write_interval(Chrono::SECONDS);
+Chrono pantalla_on_off_debounce;
+Chrono web_on_off_debounce;
 
 bool estado_pantalla = true;
 bool estado_sd = false;
@@ -35,7 +38,7 @@ void setup() {
   pantalla_init(tft);                                         // inicia la pantalla
   touch.begin();                                              // inicia el touch
   gpsSerial.begin(9600, SERIAL_8N1, GPS_RX_PIN, GPS_TX_PIN);  // inicia HardwareSerial GPS
-  estado_sd = sd_init();                                      // intenta iniciar la sd
+  estado_sd = sd_init();                                    // intenta iniciar la sd
 
   if (estado_sd) {
     File archivo = SD.open(filename, FILE_APPEND, true);
@@ -48,8 +51,9 @@ void setup() {
   }
 
   pantalla_setup(tft, TFT_PURPLE);  // setup borde
-  pantalla_bandera(tft, 0, 0, 5);   // bandera
+  // pantalla_bandera(tft, 0, 0, 5);   // bandera
   pantalla_icono_sd(tft, estado_sd);
+  pantalla_icono_server_wifi(tft, web_is_running());
 }
 
 
@@ -60,7 +64,7 @@ void loop() {
   }
 
   if (gps.location.isUpdated() && gps.location.isValid()) {
-    pantalla_fecha(tft, gps);
+    pantalla_fecha_y_hora(tft, gps);
     pantalla_gps(tft, gps, 60);
   }
 
@@ -75,4 +79,23 @@ void loop() {
   }
 
   pantalla_touch(tft, touch);
+  if(pantalla_on_off_debounce.hasPassed(500)) {
+    pantalla_on_off_debounce.restart();
+    digitalWrite(PANTALLA_PW_PIN, pantalla_on_off(tft, touch));
+  }
+
+
+  if (web_on_off_debounce.hasPassed(1000)) {
+    web_on_off_debounce.restart();
+
+    TouchPoint toque = touch.getTouch();
+    if (toque.zRaw >= 1500 && toque.x <= 70 && toque.y <= 70) {
+      if(!web_is_running()){ 
+        pantalla_icono_server_wifi(tft, web_start());
+      } else {
+        web_stop();
+        pantalla_icono_server_wifi(tft, web_is_running());
+      }
+    }
+  }
 }

@@ -5,3 +5,6 @@
 extern const unsigned char sd_icon[] PROGMEM;
 
 extern const unsigned char gps_icon[] PROGMEM;
+
+extern const unsigned char server_wifi_icon[] PROGMEM;
+extern const unsigned char no_server_wifi_icon[] PROGMEM;

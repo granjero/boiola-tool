@@ -1,7 +1,15 @@
 #include "boiola_sd.h"
 
+static bool estadoSD = false;
+
+bool sd_estado() {
+  return estadoSD;
+}
+
+
 bool sd_init() {
-  return SD.begin(SD_CS);
+  estadoSD = SD.begin(SD_CS);
+  return estadoSD;
 }
 
 

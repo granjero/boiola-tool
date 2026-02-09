@@ -8,6 +8,7 @@
 
 #define SD_CS 5
 
+bool sd_estado();
 bool sd_init();
 // setea filename a los valores de la fecha
 bool sd_set_filename(TinyGPSPlus &gps, char *filename, size_t maxLen);
