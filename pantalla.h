@@ -20,7 +20,7 @@ void pantalla_setup(TFT_eSPI &tft, uint16_t color);
 void pantalla_bandera(TFT_eSPI &tft, int x, int y, int tamanio);
 // icono sd
 void pantalla_icono_sd(TFT_eSPI &tft, bool estado);
-void pantalla_icono_gps(TFT_eSPI &tft, float hdop);
+void pantalla_icono_gps(TFT_eSPI &tft, TinyGPSPlus &gps);
 void pantalla_icono_server_wifi(TFT_eSPI &tft, bool estado);
 // imagen jpg
 void pantalla_img_jpg(TFT_eSPI &tft, TJpg_Decoder &tjpj);
