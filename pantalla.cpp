@@ -1,3 +1,4 @@
+#include <cstdint>
 // #include "esp32-hal-gpio.h"
 #include "TFT_eSPI.h"
 #include <Arduino.h>
@@ -20,24 +21,7 @@ void pantalla_init(TFT_eSPI &tft) {
 void pantalla_setup(TFT_eSPI &tft, uint16_t color) {
   tft.fillScreen(TFT_BLACK);
   tft.setTextWrap(false);
-  tft.setTextSize(2);
-  tft.fillRect(0, 0, tft.width(), 40, TFT_BLACK);
-  // tft.setCursor(10, 50);
-  // tft.print("estado SD: ");
-  // int16_t w = tft.width();
-  // int16_t h = tft.height();
-  // tft.fillRect(0, 0,
-  //              w, BORDE - 1,
-  //              color);  // linea superior
-  // tft.fillRect(0, h - BORDE + 1,
-  //              w, BORDE - 1,
-  //              color);  // linea inferior
-  // tft.fillRect(0, 0,
-  //              BORDE - 1, h,
-  //              color);
-  // tft.fillRect(w - BORDE + 1, 0,
-  //              BORDE - 1, h,
-  //              color);
+  tft.fillRect(0, 0, tft.width(), 40, TFT_BLACK);  // para la hora y los iconos
 }
 
 
@@ -124,7 +108,7 @@ void pantalla_icono_server_wifi(TFT_eSPI &tft, bool estado) {
     server_wifi_icon,
     ICON,
     ICON,
-    TFT_BLACK,
+    TFT_TRANSPARENT,
     TFT_GREEN);
   else tft.drawBitmap(
     tft.width() - ICON * 3 - BORDE,
@@ -132,7 +116,7 @@ void pantalla_icono_server_wifi(TFT_eSPI &tft, bool estado) {
     no_server_wifi_icon,
     ICON,
     ICON,
-    TFT_BLACK,
+    TFT_TRANSPARENT,
     TFT_RED);
 }
 
@@ -151,6 +135,13 @@ void pantalla_fecha_y_hora(TFT_eSPI &tft, TinyGPSPlus &gps) {
   tft.setCursor(BORDE, 20);
   tft.printf("%02d:%02d UTC",
              gps.time.hour(),
+             gps.time.minute());
+  tft.setCursor(BORDE, 38);
+  tft.printf("%02d:%02d(-3)  ",
+             horaGMT(gps.time.hour(), -3),
+             gps.time.minute());
+  tft.printf("%02d:%02d(+9)",
+             horaGMT(gps.time.hour(), 9),
              gps.time.minute());
 }
 
@@ -244,4 +235,11 @@ bool pantalla_jpg_output(int16_t x, int16_t y, uint16_t w, uint16_t h, uint16_t 
   if (y >= tft.height()) return false;
   tft.pushImage(x, y, w, h, bitmap);
   return true;
+}
+
+int8_t horaGMT(uint8_t hora, int8_t gmt) {
+  int8_t resultado = hora + gmt;
+  if (resultado < 0) return 24 + resultado;  // resultado negativo (-- = +)
+  if (resultado > 23) return resultado - 24;
+  return resultado;
 }

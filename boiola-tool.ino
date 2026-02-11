@@ -37,7 +37,7 @@ bool estado_sd = false;
 
 Estado_BOIOLA estado_actual_app = IDLE;
 
-File archivo;
+// File archivo;
 
 char filename[32] = "/boiola.boot";
 
@@ -53,11 +53,13 @@ void setup() {
     sd_boot_record(filename);
     pantalla_img_jpg(tft, TJpgDec);  // imagen
     // delay(10000);
+  } else {
+    estado_actual_app = ERROR;
   }
 
   pantalla_icono_server_wifi(tft, web_is_running());
   pantalla_icono_gps(tft, gps);
-  pantalla_icono_sd(tft, estado_sd);
+  pantalla_icono_sd(tft, sd_estado());
 }
 
 void loop() {
@@ -71,6 +73,14 @@ void loop() {
 
   // segun Estado_BOIOLA
   switch (estado_actual_app) {
+    case ERROR:
+      tft.fillScreen(TFT_RED);
+      tft.setTextSize(2);
+      tft.setTextColor(TFT_WHITE, TFT_RED);
+      tft.setCursor(0, 40);
+      tft.print("estado SD: ");
+      tft.println(sd_estado());
+
     case IDLE:
       pantalla_fecha_y_hora(tft, gps);
       pantalla_icono_server_wifi(tft, web_is_running());
@@ -78,6 +88,24 @@ void loop() {
       pantalla_icono_sd(tft, sd_estado());
 
       sd_guarda_dato_gpx(gps, filename);
+  }
+
+  tft.setCursor(0, 100);
+  tft.print(filename);
+
+
+  if (web_on_off_debounce.hasPassed(1000)) {
+    web_on_off_debounce.restart();
+
+    TouchPoint toque = touch.getTouch();
+    if (toque.zRaw >= 1500 && toque.x <= 70 && toque.y <= 70) {
+      if (!web_is_running()) {
+        pantalla_icono_server_wifi(tft, web_start());
+      } else {
+        web_stop();
+        pantalla_icono_server_wifi(tft, web_is_running());
+      }
+    }
   }
 }
 

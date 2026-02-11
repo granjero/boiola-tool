@@ -39,4 +39,7 @@ void pantalla_gps(TFT_eSPI &tft, TinyGPSPlus &gps, int y);
 const char *latDir(double lat);
 const char *lonDir(double lon);
 
+
+int8_t horaGMT(uint8_t hora, int8_t gmt);
+
 #endif
