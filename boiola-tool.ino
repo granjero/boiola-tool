@@ -87,7 +87,7 @@ void loop() {
       pantalla_icono_gps(tft, gps);
       pantalla_icono_sd(tft, sd_estado());
 
-      sd_guarda_dato_gpx(gps, filename);
+      sd_guarda_dato_gpx(gps, filename, sizeof(filename));
   }
 
   tft.setCursor(0, 100);
@@ -148,8 +148,7 @@ void loop() {
 //         pantalla_icono_server_wifi(tft, web_start());
 //       } else {
 //         web_stop();
-//         pantalla_icono_server_wifi(tft, web_is_running());
-//       }
+//
 //     }
 //   }
 // }

@@ -1,3 +1,4 @@
+#include <cstddef>
 #ifndef BOIOLA_SD_H
 #define BOIOLA_SD_H
 
@@ -17,7 +18,7 @@ File sd_open_file(char *filename);
 // setea filename a los valores de la fecha
 bool sd_set_filename(TinyGPSPlus &gps, char *filename, size_t maxLen);
 // escribe el dato gpx
-bool sd_guarda_dato_gpx(TinyGPSPlus &gpx, char *filename);
+bool sd_guarda_dato_gpx(TinyGPSPlus &gpx, char *filename, size_t buffersize);
 //escribe el encabbezado del archivo gpx
 bool sd_file_encabezado(char *filename);
 // cierra el archivo gpx

@@ -1,0 +1,13 @@
+CompileFlags:
+  Add:
+    - -D__GLIBC_USE(x)=0
+    - --target=xtensa-esp32-elf
+  CompilationDatabase: /tmp/arduino-language-server4191395026/fullbuild
+
+Index:
+  Background: Build
+
+Diagnostics:
+  UnusedIncludes: None
+  ClangTidy:
+    Remove: '*'
