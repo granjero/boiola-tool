@@ -10,7 +10,9 @@
 extern TFT_eSPI tft;
 
 Chrono pantalla_on_off_debounce;
+Chrono pantalla_off_debounce(Chrono::SECONDS);
 Chrono touch_debounce;
+
 
 bool pantalla_encendida = true;
 
@@ -217,13 +219,11 @@ TouchPoint pantalla_touch(TFT_eSPI &tft, XPT2046_Bitbang &touch) {
   return toque;
 }
 
-bool pantalla_on_off(TFT_eSPI &tfp, XPT2046_Bitbang &touch) {
-  if (pantalla_on_off_debounce.hasPassed(500)) {
+bool pantalla_on_off(TFT_eSPI &tfp, TouchPoint &toque) {
+  if (pantalla_on_off_debounce.hasPassed(1000) && toque.zRaw >= 2000 && toque.xRaw >= 190 && toque.yRaw >= 270) {
     pantalla_on_off_debounce.restart();
-    TouchPoint toque = touch.getTouch();
-    if (toque.zRaw >= 2000 && toque.x <= 30 && toque.y >= 190) {
-      pantalla_encendida = !pantalla_encendida;
-    }
+    // TouchPoint toque = touch.getTouch();
+    pantalla_encendida = !pantalla_encendida;
     digitalWrite(TFT_BL, pantalla_encendida);
   }
   return pantalla_encendida;

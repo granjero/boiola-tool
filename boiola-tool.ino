@@ -64,9 +64,9 @@ void setup() {
 
 void loop() {
 
-  // tft.setCursor(0, 100);
-  // tft.setTextSize(2);
-  // tft.println(filename);
+  tft.setCursor(0, 100);
+  tft.setTextSize(2);
+  tft.println(TFT_BL);
   // tft.printf("x:%d y:%d             ", toque.xRaw, toque.yRaw);
 
   // todo el tiempo
@@ -75,7 +75,7 @@ void loop() {
   }
 
   toque = pantalla_touch(tft, touch);
-  // pantalla_on_off(tft, touch);
+  pantalla_on_off(tft, toque);
 
   // segun Estado_BOIOLA
   switch (estado_actual_app) {

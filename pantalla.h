@@ -35,7 +35,7 @@ bool pantalla_jpg_output(int16_t x, int16_t y, uint16_t w, uint16_t h, uint16_t 
 // TOUCH
 // imprime los valores xyz del touch
 TouchPoint pantalla_touch(TFT_eSPI &tft, XPT2046_Bitbang &touch);
-bool pantalla_on_off(TFT_eSPI &tft, XPT2046_Bitbang &touch);
+bool pantalla_on_off(TFT_eSPI &tft, TouchPoint &toque);
 
 // -----------------
 //GPS
