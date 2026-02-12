@@ -1,3 +1,4 @@
+#include "XPT2046_Bitbang.h"
 #include <cstdint>
 // #include "esp32-hal-gpio.h"
 #include "TFT_eSPI.h"
@@ -9,6 +10,7 @@
 extern TFT_eSPI tft;
 
 Chrono pantalla_on_off_debounce;
+Chrono touch_debounce;
 
 bool pantalla_encendida = true;
 
@@ -136,7 +138,7 @@ void pantalla_fecha_y_hora(TFT_eSPI &tft, TinyGPSPlus &gps) {
   tft.printf("%02d:%02d UTC",
              gps.time.hour(),
              gps.time.minute());
-  tft.setCursor(BORDE, 38);
+  tft.setCursor(0, 38);
   tft.printf("%02d:%02d(-3)  ",
              horaGMT(gps.time.hour(), -3),
              gps.time.minute());
@@ -187,22 +189,32 @@ const char *lonDir(double lon) {
 }
 
 
-void pantalla_touch(TFT_eSPI &tft, XPT2046_Bitbang &touch) {
-
+TouchPoint pantalla_touch(TFT_eSPI &tft, XPT2046_Bitbang &touch) {
   TouchPoint toque = touch.getTouch();
 
-  // Display touches that have a pressure value (Z)
-  if (toque.zRaw >= 1000) {
+  if (touch_debounce.hasPassed(1000) && toque.zRaw >= 1500) {
+    touch_debounce.restart();
+
+    int16_t x = toque.y;
+    int16_t y = toque.x;
+    // int16_t x = map(toque.yRaw, X_MIN, X_MAX, 0, 240);
+    // int16_t y = map(toque.xRaw, Y_MIN, Y_MAX, 0, 320);
+
+    // Display touches that have a pressure value (Z)
     tft.setTextSize(1);
     tft.setCursor(10, 310);
-    tft.print("x: ");
-    tft.print(toque.x);
-    tft.print(" y: ");
-    tft.print(toque.y);
-    tft.print(" z: ");
-    tft.print(toque.zRaw);
-    tft.print("     ");
+    toque.xRaw = x;
+    toque.yRaw = 320 - y;
+    tft.printf("x:%d y:%d z:%d    ", toque.xRaw, toque.yRaw, toque.zRaw);
+    tft.fillCircle(toque.xRaw, toque.yRaw, 3, TFT_PINK);
+    return toque;
   }
+
+  toque.xRaw = 0;
+  toque.yRaw = 0;
+  toque.zRaw = 0;
+
+  return toque;
 }
 
 bool pantalla_on_off(TFT_eSPI &tfp, XPT2046_Bitbang &touch) {
@@ -212,7 +224,7 @@ bool pantalla_on_off(TFT_eSPI &tfp, XPT2046_Bitbang &touch) {
     if (toque.zRaw >= 2000 && toque.x <= 30 && toque.y >= 190) {
       pantalla_encendida = !pantalla_encendida;
     }
-    digitalWrite(21, pantalla_encendida);
+    digitalWrite(TFT_BL, pantalla_encendida);
   }
   return pantalla_encendida;
 }

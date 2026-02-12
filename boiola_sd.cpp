@@ -41,6 +41,7 @@ bool sd_set_filename(TinyGPSPlus &gps, char *filename, size_t maxLen) {
   // si filename == /boiola.boot es el primer loop y seteo el nombre con la fecha
   if (strcmp(filename, "/boiola.boot") == 0) {
     snprintf(filename, maxLen, "%s", nombreGPS);
+    // TO DO aca creo que hay que chequear si hay archivo con nombre gps y si no encabezarlo
     return true;
   }
   // si filename es igual a la fecha ya esta seteado y no hago nada

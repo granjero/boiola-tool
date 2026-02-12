@@ -10,6 +10,11 @@
 #define ICON 32
 #define BORDE 3
 
+#define X_MIN 150
+#define X_MAX 3800
+#define Y_MIN 260
+#define Y_MAX 3800
+
 // -----------------
 //PANTALLA
 // inicia la pantalla
@@ -29,7 +34,7 @@ bool pantalla_jpg_output(int16_t x, int16_t y, uint16_t w, uint16_t h, uint16_t 
 // -----------------
 // TOUCH
 // imprime los valores xyz del touch
-void pantalla_touch(TFT_eSPI &tft, XPT2046_Bitbang &touch);
+TouchPoint pantalla_touch(TFT_eSPI &tft, XPT2046_Bitbang &touch);
 bool pantalla_on_off(TFT_eSPI &tft, XPT2046_Bitbang &touch);
 
 // -----------------
