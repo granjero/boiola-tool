@@ -207,7 +207,7 @@ TouchPoint pantalla_touch(TFT_eSPI &tft, XPT2046_Bitbang &touch) {
     tft.setCursor(10, 310);
     toque.xRaw = x;
     toque.yRaw = 320 - y;
-    tft.printf("x:%d y:%d z:%d    ", toque.xRaw, toque.yRaw, toque.zRaw);
+    tft.printf("xRaw:%d yRaw:%d zRaw:%d    ", toque.xRaw, toque.yRaw, toque.zRaw);
     tft.fillCircle(toque.xRaw, toque.yRaw, 3, TFT_PINK);
     return toque;
   }
