@@ -1,3 +1,4 @@
+#include <cstdint>
 #ifndef PANTALLA_H
 #define PANTALLA_H
 
@@ -21,6 +22,7 @@
 void pantalla_init(TFT_eSPI &tft);
 // dibuja el setup
 void pantalla_setup(TFT_eSPI &tft, uint16_t color);
+bool pantalla_encendida();
 // dibuja una bandera
 void pantalla_bandera(TFT_eSPI &tft, int x, int y, int tamanio);
 // icono sd
@@ -34,8 +36,9 @@ bool pantalla_jpg_output(int16_t x, int16_t y, uint16_t w, uint16_t h, uint16_t 
 // -----------------
 // TOUCH
 // imprime los valores xyz del touch
-TouchPoint pantalla_touch(TFT_eSPI &tft, XPT2046_Bitbang &touch);
-bool pantalla_on_off(TFT_eSPI &tft, TouchPoint &toque);
+void pantalla_xy(TFT_eSPI &tft, TouchPoint &toque);
+TouchPoint pantalla_touch(XPT2046_Bitbang &touch);
+bool pantalla_on_off(TouchPoint &toque);
 
 // -----------------
 //GPS
@@ -43,6 +46,10 @@ void pantalla_fecha_y_hora(TFT_eSPI &tft, TinyGPSPlus &gps);
 void pantalla_gps(TFT_eSPI &tft, TinyGPSPlus &gps, int y);
 const char *latDir(double lat);
 const char *lonDir(double lon);
+
+// ----------------
+// MENU 0
+void pantalla_setup_menu0(TFT_eSPI &tft);
 
 
 int8_t horaGMT(uint8_t hora, int8_t gmt);

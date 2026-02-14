@@ -30,11 +30,12 @@ Chrono web_on_off_debounce;
 enum Estado_BOIOLA {
   ERROR,
   IDLE,
+  MENU0,
 };
 
 Estado_BOIOLA estado_actual_app = IDLE;
 
-bool estado_pantalla = true;
+// bool estado_pantalla = true;
 bool estado_sd = false;
 
 // File archivo;
@@ -42,8 +43,9 @@ bool estado_sd = false;
 char filename[32] = "/boiola.boot";
 
 void setup() {
-  pantalla_init(tft);                                         // inicia la pantalla
-  touch.begin();                                              // inicia el touch
+  pantalla_init(tft);  // inicia la pantalla
+  touch.begin();       // inicia el touch
+  // touch.setCalibration(250, 3800, 340, 3800);
   gpsSerial.begin(9600, SERIAL_8N1, GPS_RX_PIN, GPS_TX_PIN);  // inicia HardwareSerial GPS
   estado_sd = sd_init();                                      // intenta iniciar la sd
 
@@ -64,18 +66,23 @@ void setup() {
 
 void loop() {
 
-  tft.setCursor(0, 100);
-  tft.setTextSize(2);
-  tft.println(TFT_BL);
-  // tft.printf("x:%d y:%d             ", toque.xRaw, toque.yRaw);
+  // debug
+  // tft.setTextSize(2);
+  // tft.setCursor(0, 80);
+  // tft.println(gps.satellites.value());
+  // tft.println(gps.hdop.hdop());
+  // tft.println(gps.hdop.value());
 
   // todo el tiempo
   while (gpsSerial.available()) {
     gps.encode(gpsSerial.read());
   }
 
-  toque = pantalla_touch(tft, touch);
-  pantalla_on_off(tft, toque);
+  sd_guarda_dato_gpx(gps, filename, sizeof(filename));
+
+  toque = pantalla_touch(touch);
+  pantalla_xy(tft, toque);
+  pantalla_on_off(toque);
 
   // segun Estado_BOIOLA
   switch (estado_actual_app) {
@@ -87,28 +94,43 @@ void loop() {
       tft.print("estado SD: ");
       tft.println(sd_estado());
       while (true) {}
+      break;
 
     case IDLE:
       pantalla_fecha_y_hora(tft, gps);
       pantalla_icono_server_wifi(tft, web_is_running());
       pantalla_icono_gps(tft, gps);
       pantalla_icono_sd(tft, sd_estado());
+      if (pantalla_encendida() && toque.x > 60 && toque.x < 160 && toque.y > 110 && toque.y < 180) {
+        estado_actual_app = MENU0;
+        pantalla_setup_menu0(tft);
+      }
+      break;
 
-      sd_guarda_dato_gpx(gps, filename, sizeof(filename));
-  }
-
-
-
-
-  if (web_on_off_debounce.hasPassed(1000)
-      && toque.zRaw >= 1000 && toque.xRaw <= 50 && toque.yRaw >= 250) {
-    web_on_off_debounce.restart();
-
-    if (!web_is_running()) {
-      pantalla_icono_server_wifi(tft, web_start());
-    } else {
-      web_stop();
+    case MENU0:
       pantalla_icono_server_wifi(tft, web_is_running());
-    }
+      pantalla_icono_gps(tft, gps);
+      pantalla_icono_sd(tft, sd_estado());
+      if (toque.x > 130 && toque.y > 190) {
+        estado_actual_app = IDLE;
+        pantalla_setup(tft, TFT_BLACK);
+        pantalla_img_jpg(tft, TJpgDec);  // imagen
+      }
+      break;
   }
+
+
+
+
+  // if (web_on_off_debounce.hasPassed(1000)
+  //     && toque.zRaw >= 1000 && toque.x <= 50 && toque.y >= 250) {
+  //   web_on_off_debounce.restart();
+  //
+  //   if (!web_is_running()) {
+  //     pantalla_icono_server_wifi(tft, web_start());
+  //   } else {
+  //     web_stop();
+  //     pantalla_icono_server_wifi(tft, web_is_running());
+  //   }
+  // }
 }
