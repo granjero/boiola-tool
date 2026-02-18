@@ -1,9 +1,12 @@
-#include "XPT2046_Bitbang.h"
 #include <cstdint>
-// #include "esp32-hal-gpio.h"
 #include "TFT_eSPI.h"
-#include <Arduino.h>
-#include <Chrono.h>
+// #include "esp32-hal.h"
+// #include "XPT2046_Bitbang.h"
+// #include <cstdint>
+// #include "esp32-hal-gpio.h"
+// #include "TFT_eSPI.h"
+// #include <Arduino.h>
+// #include <Chrono.h>
 #include "pantalla.h"
 #include "icons.h"
 
@@ -11,7 +14,7 @@ extern TFT_eSPI tft;
 
 Chrono pantalla_on_off_debounce;
 Chrono pantalla_off_debounce(Chrono::SECONDS);
-Chrono touch_debounce;
+// Chrono touch_debounce;
 
 
 bool pantalla_esta_encendida = true;
@@ -22,10 +25,12 @@ void pantalla_init(TFT_eSPI &tft) {
 }
 
 
-void pantalla_setup(TFT_eSPI &tft, uint16_t color) {
+void pantalla_setup(TFT_eSPI &tft) {
   tft.fillScreen(TFT_BLACK);
   tft.setTextWrap(false);
   tft.fillRect(0, 0, tft.width(), 40, TFT_BLACK);  // para la hora y los iconos
+  // tft.println("SETUP");
+  // delay(3000);
 }
 
 
@@ -46,95 +51,74 @@ void pantalla_bandera(TFT_eSPI &tft, int x, int y, int tamanio) {
 }
 
 void pantalla_icono_sd(TFT_eSPI &tft, bool estado) {
-  if (estado) {
-    tft.drawBitmap(
-      tft.width() - ICON - BORDE,
-      BORDE,
-      sd_icon,
-      ICON,
-      ICON,
-      TFT_BLACK,
-      TFT_GREEN);
-  } else {
-    tft.drawBitmap(
-      tft.width() - ICON - BORDE,
-      BORDE,
-      sd_icon,
-      ICON,
-      ICON,
-      TFT_BLACK,
-      TFT_RED);
-  }
+  uint16_t color;
+  uint8_t x = tft.width() - ICON - BORDE;
+  uint8_t y = BORDE;
+  if (estado) color = TFT_GREEN;
+  else color = TFT_RED;
+  tft.drawBitmap(
+    x,
+    y,
+    sd_icon,
+    ICON,
+    ICON,
+    TFT_BLACK,
+    color);
 }
 void pantalla_icono_gps(TFT_eSPI &tft, TinyGPSPlus &gps) {
+  uint16_t color;
+  uint8_t x = tft.width() - ICON * 2 - BORDE * 2;
+  uint8_t y = BORDE;
   if (gps.hdop.isValid()) {
     float hdop = gps.hdop.hdop();
-    if (hdop <= 1) {
-      tft.drawBitmap(
-        tft.width() - ICON * 2 - BORDE,
-        BORDE,
-        gps_icon,
-        ICON,
-        ICON,
-        TFT_BLACK,
-        TFT_GREEN);
-    } else if (hdop <= 2) {
-      tft.drawBitmap(
-        tft.width() - ICON * 2 - BORDE,
-        BORDE,
-        gps_icon,
-        ICON,
-        ICON,
-        TFT_BLACK,
-        TFT_YELLOW);
-    } else if (hdop < 5) {
-      tft.drawBitmap(
-        tft.width() - ICON * 2 - BORDE,
-        BORDE,
-        gps_icon,
-        ICON,
-        ICON,
-        TFT_BLACK,
-        TFT_ORANGE);
-    } else {
-      tft.drawBitmap(
-        tft.width() - ICON * 2 - BORDE,
-        BORDE,
-        gps_icon,
-        ICON,
-        ICON,
-        TFT_BLACK,
-        TFT_RED);
-    }
+
+    if (hdop <= 1) color = TFT_GREEN;
+    else if (hdop <= 2) color = TFT_YELLOW;
+    else if (hdop <= 5) color = TFT_ORANGE;
+    else color = TFT_RED;
+
+    tft.drawBitmap(
+      x,
+      y,
+      gps_icon,
+      ICON,
+      ICON,
+      TFT_BLACK,
+      color);
+
   } else {
     tft.drawBitmap(
-      tft.width() - ICON * 2 - BORDE,
-      BORDE,
+      x,
+      y,
       gps_invalid_icon,
       ICON,
       ICON,
       TFT_BLACK,
       TFT_RED);
   }
+  tft.setCursor(tft.width() - ICON - BORDE, BORDE);
+  tft.setTextSize(1);
+  tft.setTextColor(TFT_CYAN, TFT_BLACK);
+  tft.printf("%d", gps.satellites.value());
 }
 
 void pantalla_icono_server_wifi(TFT_eSPI &tft, bool estado) {
-  if (estado) tft.drawBitmap(
-    tft.width() - ICON * 3 - BORDE,
-    BORDE,
-    server_wifi_icon,
-    ICON,
-    ICON,
-    TFT_BLACK,
-    TFT_GREEN);
-  else tft.drawBitmap(
-    tft.width() - ICON * 3 - BORDE,
-    BORDE,
+  uint16_t color;
+  uint8_t x = tft.width() - ICON * 3 - BORDE * 3;
+  uint8_t y = BORDE;
+  if (estado)
+    color = TFT_GREEN;
+
+  else color = TFT_RED;
+
+  tft.drawBitmap(
+    x,
+    y,
     no_server_wifi_icon,
     ICON,
     ICON,
     TFT_BLACK,
-    TFT_RED);
+    color);
 }
 
 
@@ -173,24 +157,25 @@ void pantalla_gps(TFT_eSPI &tft, TinyGPSPlus &gps, int y) {
   int X = 10;
 
   tft.setTextSize(2);
-  // Lat
+  tft.setTextColor(TFT_WHITE, TFT_BLACK);
   tft.setCursor(X, Y);
   tft.printf("%s %.4f    ", latDir(lat), abs(lat));
-  // Lon
   tft.setCursor(X, Y + 20);
   tft.printf("%s %.4f   ", lonDir(lon), abs(lon));
-  // Alt
   tft.setCursor(X, Y + 40);
   tft.printf("%.2f msnm   ", gps.altitude.meters());
-
-  // Satellites (color by HDOP)
-
-  pantalla_icono_gps(tft, gps);
-
-  tft.setTextSize(4);
-  // Speed
   tft.setCursor(X, Y + 60);
   tft.printf("%.1f kph ", gps.speed.kmph());
+  tft.setCursor(X, Y + 80);
+  tft.printf("Sats: %d        ", gps.satellites.value());
+  tft.setCursor(X, Y + 100);
+  tft.printf("Age: %f", gps.location.age());
+  tft.setCursor(X, Y + 120);
+  tft.printf("RX: %d", gps.charsProcessed());
+  tft.setCursor(X, Y + 140);
+  tft.printf("fail: %d", gps.failedChecksum());
+  tft.setCursor(X, Y + 160);
+  tft.printf("pass: %d", gps.passedChecksum());
 }
 
 
@@ -204,48 +189,46 @@ const char *lonDir(double lon) {
 }
 
 
-TouchPoint pantalla_touch(XPT2046_Bitbang &touch) {
-  TouchPoint toque = touch.getTouch();
-
-  int16_t x = toque.x;
-  int16_t y = toque.y;
-
-  toque.x = y;
-  toque.y = 320 - x;
-
-  if (touch_debounce.hasPassed(150) && toque.zRaw >= 2000) {
-    return toque;
-  }
-  toque.zRaw = 0;
-  return toque;
-}
-
 void pantalla_xy(TFT_eSPI &tft, TouchPoint &toque) {
   if (toque.zRaw > 0) {
     tft.setTextSize(1);
+    // tft.setCursor(10, 290);
+    // tft.printf("xR:%d yR:%d zR:%d    ", toque.xRaw, toque.yRaw, toque.zRaw);
     tft.setCursor(10, 310);
-    tft.printf("xR:%d yR:%d zR:%d    ", toque.xRaw, toque.yRaw, toque.zRaw);
-    tft.setCursor(10, 290);
     tft.printf("x:%d y:%d     ", toque.x, toque.y);
     tft.fillCircle(toque.x, toque.y, 4, TFT_PINK);
   }
 }
 
 
-
-bool pantalla_on_off(TouchPoint &toque) {
-  if (pantalla_off_debounce.hasPassed(60 * 5)) {
-    pantalla_off_debounce.restart();
-    pantalla_esta_encendida = false;
-    digitalWrite(TFT_BL, pantalla_esta_encendida);
-  } else if (pantalla_on_off_debounce.hasPassed(1000) && toque.zRaw >= 2000 && toque.x >= 190 && toque.y >= 270) {
+void pantalla_on_off() {
+  // if (pantalla_off_debounce.hasPassed(60 * 5)) {
+  //   pantalla_off_debounce.restart();
+  //   pantalla_esta_encendida = false;
+  //   digitalWrite(TFT_BL, pantalla_esta_encendida);
+  // } else if (pantalla_on_off_debounce.hasPassed(1000) && toque.zRaw >= 2000 && toque.x >= 190 && toque.y >= 270) {
+  //   pantalla_on_off_debounce.restart();
+  //   pantalla_off_debounce.restart();
+  //   pantalla_esta_encendida = !pantalla_esta_encendida;
+  //   digitalWrite(TFT_BL, pantalla_esta_encendida);
+  // }
+  // return pantalla_esta_encendida;
+  if (pantalla_on_off_debounce.hasPassed(1000)) {
     pantalla_on_off_debounce.restart();
-    pantalla_off_debounce.restart();
     pantalla_esta_encendida = !pantalla_esta_encendida;
     digitalWrite(TFT_BL, pantalla_esta_encendida);
   }
-  return pantalla_esta_encendida;
 }
+
+
+void pantalla_auto_off() {
+  if (pantalla_off_debounce.hasPassed(60 * 3)) {
+    pantalla_off_debounce.restart();
+    pantalla_esta_encendida = false;
+    digitalWrite(TFT_BL, pantalla_esta_encendida);
+  }
+}
+
 
 void pantalla_img_jpg(TFT_eSPI &tft, TJpg_Decoder &tjpj) {
 
@@ -275,24 +258,29 @@ int8_t horaGMT(uint8_t hora, int8_t gmt) {
 
 void pantalla_setup_menu0(TFT_eSPI &tft) {
   tft.fillScreen(TFT_BLACK);
-  tft.drawLine(tft.width() / 2, 50, tft.width() / 2, 320 - 50, TFT_PURPLE);
-  tft.drawLine(30, tft.height() / 2, 240 - 30, tft.height() / 2, TFT_PURPLE);
+  tft.drawWideLine(tft.width() / 2.0, 50, tft.width() / 2.0, 320 - 50, 3, TFT_PURPLE);
+  tft.drawWideLine(30, tft.height() / 2.0, 240 - 30, tft.height() / 2.0, 3, TFT_PURPLE);
   tft.setTextSize(2);
   tft.setTextColor(TFT_GREENYELLOW, TFT_BLACK);
 
+  // icono Server GPX
   tft.drawBitmap(
-    30,
-    60,
+    40,
+    180,
     gpx_download,
     64,
     64,
     TFT_BLACK,
     TFT_GREENYELLOW);
-  // tft.setCursor(10, 60);
-  // tft.print("Descargar");
-  // tft.setCursor(10, 80);
-  // tft.print("GPX");
-
-  tft.setCursor(150, 190);
-  tft.print("VOLVER");
+  // icono Volver
+  tft.drawBitmap(
+    130,
+    180,
+    volver,
+    64,
+    64,
+    TFT_BLACK,
+    TFT_GREENYELLOW);
+  // tft.setCursor(130, 190);
+  // tft.print("VOLVER");
 }

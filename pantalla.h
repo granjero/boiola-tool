@@ -7,6 +7,7 @@
 #include <TinyGPSPlus.h>
 #include <XPT2046_Bitbang.h>
 #include <TJpg_Decoder.h>
+#include <Chrono.h>
 
 #define ICON 32
 #define BORDE 3
@@ -21,7 +22,7 @@
 // inicia la pantalla
 void pantalla_init(TFT_eSPI &tft);
 // dibuja el setup
-void pantalla_setup(TFT_eSPI &tft, uint16_t color);
+void pantalla_setup(TFT_eSPI &tft);
 bool pantalla_encendida();
 // dibuja una bandera
 void pantalla_bandera(TFT_eSPI &tft, int x, int y, int tamanio);
@@ -37,8 +38,8 @@ bool pantalla_jpg_output(int16_t x, int16_t y, uint16_t w, uint16_t h, uint16_t 
 // TOUCH
 // imprime los valores xyz del touch
 void pantalla_xy(TFT_eSPI &tft, TouchPoint &toque);
-TouchPoint pantalla_touch(XPT2046_Bitbang &touch);
-bool pantalla_on_off(TouchPoint &toque);
+void pantalla_on_off();
+void pantalla_auto_off();
 
 // -----------------
 //GPS
