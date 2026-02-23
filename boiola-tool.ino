@@ -9,7 +9,7 @@
 #define TOUCH_IRQ 36
 #define TOUCH_MISO 39
 #define SD_CS 5
-#define PANTALLA_PW_PIN 21
+// #define PANTALLA_PW_PIN 21
 
 #define GPS_RX_PIN 27
 #define GPS_TX_PIN 22
