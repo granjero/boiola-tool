@@ -96,29 +96,40 @@ void pantalla_icono_gps(TFT_eSPI &tft, TinyGPSPlus &gps) {
       TFT_BLACK,
       TFT_RED);
   }
-  tft.setCursor(tft.width() - ICON - BORDE, BORDE);
-  tft.setTextSize(1);
-  tft.setTextColor(TFT_CYAN, TFT_BLACK);
-  tft.printf("%d", gps.satellites.value());
+  // tft.setCursor(tft.width() - ICON - BORDE, BORDE);
+  // tft.setTextSize(1);
+  // tft.setTextColor(TFT_CYAN, TFT_BLACK);
+  // tft.printf("%d", gps.satellites.value());
 }
 
 void pantalla_icono_server_wifi(TFT_eSPI &tft, bool estado) {
   uint16_t color;
   uint8_t x = tft.width() - ICON * 3 - BORDE * 3;
   uint8_t y = BORDE;
-  if (estado)
+  if (estado) {
     color = TFT_GREEN;
+    tft.drawBitmap(
+      x,
+      y,
+      server_wifi_icon,
+      ICON,
+      ICON,
+      TFT_BLACK,
+      color);
+  }
 
-  else color = TFT_RED;
+  else {
+    color = TFT_RED;
 
-  tft.drawBitmap(
-    x,
-    y,
-    no_server_wifi_icon,
-    ICON,
-    ICON,
-    TFT_BLACK,
-    color);
+    tft.drawBitmap(
+      x,
+      y,
+      no_server_wifi_icon,
+      ICON,
+      ICON,
+      TFT_BLACK,
+      color);
+  }
 }
 
 
@@ -262,6 +273,21 @@ void pantalla_setup_menu0(TFT_eSPI &tft) {
   tft.drawWideLine(30, tft.height() / 2.0, 240 - 30, tft.height() / 2.0, 3, TFT_PURPLE);
   tft.setTextSize(2);
   tft.setTextColor(TFT_GREENYELLOW, TFT_BLACK);
+  tft.setCursor(140, 70);
+  tft.print("GPS");
+  tft.setCursor(140, 110);
+  tft.print("debug");
+
+
+  // icono trip
+  tft.drawBitmap(
+    10,
+    50,
+    trip,
+    100,
+    100,
+    TFT_BLACK,
+    TFT_GREENYELLOW);
 
   // icono Server GPX
   tft.drawBitmap(
@@ -272,9 +298,10 @@ void pantalla_setup_menu0(TFT_eSPI &tft) {
     64,
     TFT_BLACK,
     TFT_GREENYELLOW);
+
   // icono Volver
   tft.drawBitmap(
-    130,
+    140,
     180,
     volver,
     64,

@@ -13,3 +13,5 @@ extern const unsigned char no_server_wifi_icon[] PROGMEM;
 extern const unsigned char gpx_download[] PROGMEM;
 
 extern const unsigned char volver[] PROGMEM;
+
+extern const unsigned char trip[] PROGMEM;

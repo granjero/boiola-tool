@@ -18,6 +18,7 @@
 #include "boiola_sd.h"
 #include "boiola_web.h"
 #include "touch.h"
+#include "icons.h"
 
 enum Estado_BOIOLA {
   ERROR,
@@ -25,6 +26,7 @@ enum Estado_BOIOLA {
   MENU0,
   GPS_DATA,
   GPX_SERVER,
+  TRIP,
 };
 
 Estado_BOIOLA estado_actual_app = IDLE;
@@ -123,6 +125,7 @@ void loop() {
         if (touch_OK(toque.x, toque.y, botonMenu0)) {
           botonMenu0.action(botonMenu0.estado_app);
           pantalla_setup_menu0(tft);
+
           // dibujaBoton(botonMenu1, TFT_CYAN);
           // dibujaBoton(botonMenu2, TFT_CYAN);
           // dibujaBoton(botonMenu3, TFT_CYAN);
@@ -136,11 +139,24 @@ void loop() {
       pantalla_icono_gps(tft, gps);
       pantalla_icono_sd(tft, sd_estado());
 
+      // TRIP
+      if (touch_OK(toque.x, toque.y, botonMenu1)) {
+        botonMenu1.action(botonMenu1.estado_app);
+        tft.fillScreen(TFT_BLACK);
+      }
+
       // GPS DATA
       if (touch_OK(toque.x, toque.y, botonMenu2)) {
         botonMenu2.action(botonMenu2.estado_app);
         tft.fillScreen(TFT_BLACK);
       }
+
+      // GPXSERVER
+      if (touch_OK(toque.x, toque.y, botonMenu3)) {
+        botonMenu3.action(botonMenu3.estado_app);
+        tft.fillScreen(TFT_BLACK);
+      }
+
       // VOLVER
       if (touch_OK(toque.x, toque.y, botonMenu4)) {
         botonMenu4.action(botonMenu4.estado_app);
@@ -158,19 +174,43 @@ void loop() {
         pantalla_img_jpg(tft, TJpgDec);  // imagen
       }
       break;
+
+    case GPX_SERVER:
+
+      if (!web_is_running()) {
+        pantalla_icono_server_wifi(tft, web_start());
+        tft.setTextSize(3);
+        tft.setCursor(10, 50);
+        tft.print("Conectar");
+        tft.setCursor(10, 75);
+        tft.print("SSID:");
+        tft.setCursor(10, 100);
+        tft.print("BOIOLA-TOOL");
+        tft.drawBitmap(
+          140,
+          180,
+          volver,
+          64,
+          64,
+          TFT_BLACK,
+          TFT_GREENYELLOW);
+      }
+      pantalla_fecha_y_hora(tft, gps);
+      pantalla_icono_server_wifi(tft, web_is_running());
+      pantalla_icono_gps(tft, gps);
+      pantalla_icono_sd(tft, sd_estado());
+
+
+      if (touch_OK(toque.x, toque.y, botonMenu4)) {
+        botonMenu4.action(botonMenu4.estado_app);
+
+        web_stop();
+        pantalla_setup(tft);
+        pantalla_img_jpg(tft, TJpgDec);  // imagen
+      }
+
+      break;
   }
-
-
-
-
-
-  //   if (!web_is_running()) {
-  //     pantalla_icono_server_wifi(tft, web_start());
-  //   } else {
-  //     web_stop();
-  //     pantalla_icono_server_wifi(tft, web_is_running());
-  //   }
-  // }
 }
 
 void dibujaBoton(PropiedadesBoton boton, uint16_t color) {
