@@ -170,23 +170,25 @@ void pantalla_gps(TFT_eSPI &tft, TinyGPSPlus &gps, int y) {
   tft.setTextSize(2);
   tft.setTextColor(TFT_WHITE, TFT_BLACK);
   tft.setCursor(X, Y);
-  tft.printf("%s %.4f    ", latDir(lat), abs(lat));
+  tft.printf("lat: %.4f    ", lat);
   tft.setCursor(X, Y + 20);
-  tft.printf("%s %.4f   ", lonDir(lon), abs(lon));
+  tft.printf("lon: %.4f   ", lon);
   tft.setCursor(X, Y + 40);
-  tft.printf("%.2f msnm   ", gps.altitude.meters());
+  tft.printf("alt: %.0f msnm   ", gps.altitude.meters());
   tft.setCursor(X, Y + 60);
-  tft.printf("%.1f kph ", gps.speed.kmph());
+  tft.printf("vel: %.1f kph  ", gps.speed.kmph());
   tft.setCursor(X, Y + 80);
-  tft.printf("Sats: %d        ", gps.satellites.value());
+  tft.printf("sats: %d       ", gps.satellites.value());
   tft.setCursor(X, Y + 100);
-  tft.printf("Age: %f", gps.location.age());
+  tft.printf("age: %f         ", gps.location.age());
   tft.setCursor(X, Y + 120);
   tft.printf("RX: %d", gps.charsProcessed());
   tft.setCursor(X, Y + 140);
   tft.printf("fail: %d", gps.failedChecksum());
   tft.setCursor(X, Y + 160);
   tft.printf("pass: %d", gps.passedChecksum());
+  tft.setCursor(X, Y + 180);
+  tft.printf("curso: %d", gps.course.value());
 }
 
 
@@ -269,17 +271,11 @@ int8_t horaGMT(uint8_t hora, int8_t gmt) {
 
 void pantalla_setup_menu0(TFT_eSPI &tft) {
   tft.fillScreen(TFT_BLACK);
-  tft.drawWideLine(tft.width() / 2.0, 50, tft.width() / 2.0, 320 - 50, 3, TFT_PURPLE);
-  tft.drawWideLine(30, tft.height() / 2.0, 240 - 30, tft.height() / 2.0, 3, TFT_PURPLE);
+  pantalla_divisor_botones(tft);
   tft.setTextSize(2);
   tft.setTextColor(TFT_GREENYELLOW, TFT_BLACK);
-  tft.setCursor(140, 70);
-  tft.print("GPS");
-  tft.setCursor(140, 110);
-  tft.print("debug");
 
-
-  // icono trip
+  // menu1 | icono trip
   tft.drawBitmap(
     10,
     50,
@@ -289,7 +285,13 @@ void pantalla_setup_menu0(TFT_eSPI &tft) {
     TFT_BLACK,
     TFT_GREENYELLOW);
 
-  // icono Server GPX
+  // menu2
+  tft.setCursor(140, 70);
+  tft.print("GPS");
+  tft.setCursor(140, 110);
+  tft.print("debug");
+
+  // menu3 | icono Server GPX9
   tft.drawBitmap(
     40,
     180,
@@ -299,15 +301,25 @@ void pantalla_setup_menu0(TFT_eSPI &tft) {
     TFT_BLACK,
     TFT_GREENYELLOW);
 
-  // icono Volver
-  tft.drawBitmap(
-    140,
-    180,
-    volver,
-    64,
-    64,
-    TFT_BLACK,
-    TFT_GREENYELLOW);
-  // tft.setCursor(130, 190);
-  // tft.print("VOLVER");
+  // menu4 | volver
+  // tft.drawBitmap(
+  //   140,
+  //   180,
+  //   volver,
+  //   64,
+  //   64,
+  //   TFT_BLACK,
+  //   TFT_GREENYELLOW);
+  tft.setCursor(130, 190);
+  tft.print("««═══╗");
+  tft.setCursor(130, 210);
+  tft.print("  ═══╝");
+  tft.setCursor(130, 230);
+  tft.print("VOLVER");
 }
+
+void pantalla_divisor_botones(TFT_eSPI &tft) {
+  tft.drawWideLine(tft.width() / 2.0, 50, tft.width() / 2.0, 320 - 50, 3, TFT_PURPLE);
+  tft.drawWideLine(30, tft.height() / 2.0, 240 - 30, tft.height() / 2.0, 3, TFT_PURPLE);
+}
+

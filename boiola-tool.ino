@@ -44,7 +44,7 @@ TouchPoint toque;
 PropiedadesBoton botonOnOffPantalla = { 200, 290, 40, 30, nullptr, 0 };
 PropiedadesBoton botonMenu0 = { 70, 100, 100, 50, set_estado_actual_app, MENU0 };
 
-PropiedadesBoton botonMenu1 = { 40, 60, 60, 80, nullptr, 0 };
+PropiedadesBoton botonMenu1 = { 40, 60, 60, 80, set_estado_actual_app, TRIP };
 PropiedadesBoton botonMenu2 = { 140, 60, 60, 80, set_estado_actual_app, GPS_DATA };
 PropiedadesBoton botonMenu3 = { 40, 180, 60, 80, set_estado_actual_app, GPX_SERVER };
 PropiedadesBoton botonMenu4 = { 140, 180, 60, 80, set_estado_actual_app, IDLE };
@@ -77,21 +77,10 @@ void setup() {
 }
 
 void loop() {
-
-  // DEBUG
-  // tft.setTextSize(2);
-  // tft.setCursor(0, 80);
-  // tft.println(estado_actual_app);
-  // tft.println(gps.hdop.hdop());
-  // tft.println(gps.hdop.value());
-
-  // pantalla_gps(tft, gps, 120);
-
   // TIENE QUE CORRER TODO EL TIEMPO
   while (gpsSerial.available()) {
     gps.encode(gpsSerial.read());
   }
-
   sd_guarda_dato_gpx(gps, filename, sizeof(filename));
 
   // TOQUES
@@ -115,7 +104,7 @@ void loop() {
       break;
 
     case IDLE:
-      if (pantalla_encendida) {
+      if (pantalla_encendida()) {
         pantalla_fecha_y_hora(tft, gps);
         pantalla_icono_server_wifi(tft, web_is_running());
         pantalla_icono_gps(tft, gps);
@@ -125,11 +114,6 @@ void loop() {
         if (touch_OK(toque.x, toque.y, botonMenu0)) {
           botonMenu0.action(botonMenu0.estado_app);
           pantalla_setup_menu0(tft);
-
-          // dibujaBoton(botonMenu1, TFT_CYAN);
-          // dibujaBoton(botonMenu2, TFT_CYAN);
-          // dibujaBoton(botonMenu3, TFT_CYAN);
-          // dibujaBoton(botonMenu4, TFT_CYAN);
         }
       }
       break;
@@ -143,6 +127,7 @@ void loop() {
       if (touch_OK(toque.x, toque.y, botonMenu1)) {
         botonMenu1.action(botonMenu1.estado_app);
         tft.fillScreen(TFT_BLACK);
+        pantalla_divisor_botones(tft);
       }
 
       // GPS DATA
@@ -176,7 +161,6 @@ void loop() {
       break;
 
     case GPX_SERVER:
-
       if (!web_is_running()) {
         pantalla_icono_server_wifi(tft, web_start());
         tft.setTextSize(3);
@@ -210,9 +194,33 @@ void loop() {
       }
 
       break;
+
+
+    case TRIP:
+      tft.setCursor(30, 100);
+      tft.setTextSize(3);
+      tft.print("TRIPEANDO");
+      break;
   }
 }
 
 void dibujaBoton(PropiedadesBoton boton, uint16_t color) {
   tft.fillRect(boton.x, boton.y, boton.width, boton.height, color);
 }
+
+
+
+
+// dibujaBoton(botonMenu1, TFT_CYAN);
+// dibujaBoton(botonMenu2, TFT_CYAN);
+// dibujaBoton(botonMenu3, TFT_CYAN);
+// dibujaBoton(botonMenu4, TFT_CYAN);
+//
+// DEBUG
+// tft.setTextSize(2);
+// tft.setCursor(0, 80);
+// tft.println(estado_actual_app);
+// tft.println(gps.hdop.hdop());
+// tft.println(gps.hdop.value());
+
+// pantalla_gps(tft, gps, 120);

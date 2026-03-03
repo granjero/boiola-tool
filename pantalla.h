@@ -52,6 +52,7 @@ const char *lonDir(double lon);
 // MENU 0
 void pantalla_setup_menu0(TFT_eSPI &tft);
 
+void pantalla_divisor_botones(TFT_eSPI &tft);
 
 int8_t horaGMT(uint8_t hora, int8_t gmt);
 
