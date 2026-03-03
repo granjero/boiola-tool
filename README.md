@@ -1,5 +1,6 @@
-´´´ BOIOLA - TOOL
+### BOIOLA - TOOL
 
-gps loguer
+## gps loguer
 
-esp32 CYD + Gy-neo6mv2
+# Hardware
+esp32 CYD + Gy-neo6mv2 + sd card + batteries + batterie circuit charger
