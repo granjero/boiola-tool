@@ -160,7 +160,6 @@ void pantalla_fecha_y_hora(TFT_eSPI &tft, TinyGPSPlus &gps) {
 
 void pantalla_gps(TFT_eSPI &tft, TinyGPSPlus &gps, int y) {
 
-  float hdop = gps.hdop.hdop();
 
   double lat = gps.location.lat();
   double lon = gps.location.lng();
@@ -180,14 +179,16 @@ void pantalla_gps(TFT_eSPI &tft, TinyGPSPlus &gps, int y) {
   tft.setCursor(X, Y + 80);
   tft.printf("sats: %d       ", gps.satellites.value());
   tft.setCursor(X, Y + 100);
-  tft.printf("age: %f         ", gps.location.age());
+  tft.printf("hdop: %.2f       ", gps.hdop.hdop());
   tft.setCursor(X, Y + 120);
-  tft.printf("RX: %d", gps.charsProcessed());
+  tft.printf("age: %lu ms       ", gps.location.age());
   tft.setCursor(X, Y + 140);
-  tft.printf("fail: %d", gps.failedChecksum());
+  tft.printf("RX: %d", gps.charsProcessed());
   tft.setCursor(X, Y + 160);
-  tft.printf("pass: %d", gps.passedChecksum());
+  tft.printf("fail: %d", gps.failedChecksum());
   tft.setCursor(X, Y + 180);
+  tft.printf("pass: %d", gps.passedChecksum());
+  tft.setCursor(X, Y + 200);
   tft.printf("curso: %d", gps.course.value());
 }
 
@@ -235,7 +236,7 @@ void pantalla_on_off() {
 
 
 void pantalla_auto_off() {
-  if (pantalla_off_debounce.hasPassed(60 * 3)) {
+  if (pantalla_esta_encendida && pantalla_off_debounce.hasPassed(60 * 3)) {
     pantalla_off_debounce.restart();
     pantalla_esta_encendida = false;
     digitalWrite(TFT_BL, pantalla_esta_encendida);
@@ -311,10 +312,8 @@ void pantalla_setup_menu0(TFT_eSPI &tft) {
   //   TFT_BLACK,
   //   TFT_GREENYELLOW);
   tft.setCursor(130, 190);
-  tft.print("««═══╗");
+  tft.print("<<--");
   tft.setCursor(130, 210);
-  tft.print("  ═══╝");
-  tft.setCursor(130, 230);
   tft.print("VOLVER");
 }
 
@@ -322,4 +321,3 @@ void pantalla_divisor_botones(TFT_eSPI &tft) {
   tft.drawWideLine(tft.width() / 2.0, 50, tft.width() / 2.0, 320 - 50, 3, TFT_PURPLE);
   tft.drawWideLine(30, tft.height() / 2.0, 240 - 30, tft.height() / 2.0, 3, TFT_PURPLE);
 }
-

@@ -11,19 +11,36 @@
 #define SD_CS 5
 
 
+// --- Init ---
 bool sd_estado();
 bool sd_init();
-bool sd_boot_record(char *filename);
-File sd_open_file(char *filename);
-// setea filename a los valores de la fecha
-bool sd_set_filename(TinyGPSPlus &gps, char *filename, size_t maxLen);
-// escribe el dato gpx
-bool sd_guarda_dato_gpx(TinyGPSPlus &gpx, char *filename, size_t buffersize);
-//escribe el encabbezado del archivo gpx
-bool sd_file_encabezado(char *filename);
-// cierra el archivo gpx
-bool sd_file_footer(char *filename);
-// escribe un dato en el archivo
-bool sd_file_append_gps_point(TinyGPSPlus &gps, char *filename);
+bool sd_file_boot_record();
+
+// --- File layer ---
+bool sd_file_gpx_header();
+bool sd_file_gpx_footer();
+
+// --- Track layer ---
+bool sd_file_track_open();
+bool sd_file_track_close();
+
+// --- Segment layer ---
+bool sd_file_segment_open();
+bool sd_file_segment_close();
+
+// --- Data writers ---
+// bool sd_file_trackpoint(TinyGPSPlus &gps, const char *name, const char *desc);
+
+// --- Orchestration ---
+bool sd_set_filename(TinyGPSPlus &gps);
+bool sd_guarda_dato_gpx(TinyGPSPlus &gps);
+
+// --- State setters (called from CYD UI) ---
+void sd_set_track_name(const char *name);
+
+// --- Buffer ---
+void sd_buffer_trkpt(TinyGPSPlus &gps, const char *name, const char *desc);
+bool sd_buffer_flush_to_sd();
+
 
 #endif

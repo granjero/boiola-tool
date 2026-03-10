@@ -55,7 +55,7 @@ Chrono web_on_off_debounce;
 bool estado_sd = false;
 
 // File archivo
-char filename[32] = "/boiola.boot";
+// char filename[32] = "/boiola.boot";
 
 void setup() {
   pantalla_init(tft);                                         // inicia la pantalla
@@ -65,7 +65,7 @@ void setup() {
 
   pantalla_setup(tft);
   if (estado_sd) {
-    sd_boot_record(filename);
+    sd_file_boot_record();
     pantalla_img_jpg(tft, TJpgDec);  // imagen
   } else {
     estado_actual_app = ERROR;
@@ -81,7 +81,7 @@ void loop() {
   while (gpsSerial.available()) {
     gps.encode(gpsSerial.read());
   }
-  sd_guarda_dato_gpx(gps, filename, sizeof(filename));
+  sd_guarda_dato_gpx(gps);
 
   // TOQUES
   toque = touch_pantalla(touch);
