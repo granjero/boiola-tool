@@ -50,9 +50,14 @@ const char *lonDir(double lon);
 
 // ----------------
 // MENU 0
-void pantalla_setup_menu0(TFT_eSPI &tft);
-
+void pantalla_setup_menu0(TFT_eSPI &tft, bool trip_activo);
 void pantalla_divisor_botones(TFT_eSPI &tft);
+
+// ----------------
+// TRIP
+void pantalla_setup_trip_menu(TFT_eSPI &tft);
+void pantalla_trip_activo(TFT_eSPI &tft, uint8_t hh, uint8_t mm, uint8_t ss,
+                          float vel_kph, double dist_km, const char *nombre);
 
 int8_t horaGMT(uint8_t hora, int8_t gmt);
 

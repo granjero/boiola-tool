@@ -37,6 +37,8 @@ bool sd_guarda_dato_gpx(TinyGPSPlus &gps);
 
 // --- State setters (called from CYD UI) ---
 void sd_set_track_name(const char *name);
+void sd_set_track_extension(const char *type);
+bool sd_close_track();
 
 // --- Buffer ---
 void sd_buffer_trkpt(TinyGPSPlus &gps, const char *name, const char *desc);

@@ -270,21 +270,30 @@ int8_t horaGMT(uint8_t hora, int8_t gmt) {
   return resultado;
 }
 
-void pantalla_setup_menu0(TFT_eSPI &tft) {
+void pantalla_setup_menu0(TFT_eSPI &tft, bool trip_activo) {
   tft.fillScreen(TFT_BLACK);
   pantalla_divisor_botones(tft);
   tft.setTextSize(2);
   tft.setTextColor(TFT_GREENYELLOW, TFT_BLACK);
 
-  // menu1 | icono trip
-  tft.drawBitmap(
-    10,
-    50,
-    trip,
-    100,
-    100,
-    TFT_BLACK,
-    TFT_GREENYELLOW);
+  // menu1 | icono trip o FIN TRIP si hay viaje activo
+  if (trip_activo) {
+    tft.setTextColor(TFT_RED, TFT_BLACK);
+    tft.setCursor(15, 90);
+    tft.print("FIN");
+    tft.setCursor(15, 110);
+    tft.print("TRIP");
+    tft.setTextColor(TFT_GREENYELLOW, TFT_BLACK);
+  } else {
+    tft.drawBitmap(
+      10,
+      50,
+      trip,
+      100,
+      100,
+      TFT_BLACK,
+      TFT_GREENYELLOW);
+  }
 
   // menu2
   tft.setCursor(140, 70);
@@ -320,4 +329,66 @@ void pantalla_setup_menu0(TFT_eSPI &tft) {
 void pantalla_divisor_botones(TFT_eSPI &tft) {
   tft.drawWideLine(tft.width() / 2.0, 50, tft.width() / 2.0, 320 - 50, 3, TFT_PURPLE);
   tft.drawWideLine(30, tft.height() / 2.0, 240 - 30, tft.height() / 2.0, 3, TFT_PURPLE);
+}
+
+void pantalla_setup_trip_menu(TFT_eSPI &tft) {
+  tft.fillScreen(TFT_BLACK);
+  pantalla_divisor_botones(tft);
+  tft.setTextSize(2);
+  tft.setTextColor(TFT_GREENYELLOW, TFT_BLACK);
+
+  // top-left: BICICLETA
+  tft.setCursor(10, 70);
+  tft.print("BICI-");
+  tft.setCursor(10, 90);
+  tft.print("CLETA");
+
+  // top-right: TREN
+  tft.setCursor(170, 70);
+  tft.print("TREN");
+
+  // bottom-left: VIAJE
+  tft.setCursor(10, 190);
+  tft.print("VIAJE");
+
+  // bottom-right: VOLVER
+  tft.setCursor(170, 190);
+  tft.print("<<--");
+  tft.setCursor(170, 210);
+  tft.print("VOLVER");
+}
+
+void pantalla_trip_activo(TFT_eSPI &tft, uint8_t hh, uint8_t mm, uint8_t ss,
+                          float vel_kph, double dist_km, const char *nombre) {
+  // trip name
+  tft.setTextSize(2);
+  tft.setTextColor(TFT_CYAN, TFT_BLACK);
+  tft.setCursor(BORDE, 55);
+  tft.printf("%-20s", nombre);
+
+  // chronometer
+  tft.setTextColor(TFT_YELLOW, TFT_BLACK);
+  tft.setCursor(BORDE, 85);
+  tft.print("CRONO");
+  tft.setTextSize(3);
+  tft.setCursor(BORDE, 100);
+  tft.printf("%02d:%02d:%02d", hh, mm, ss);
+
+  // speed
+  tft.setTextSize(2);
+  tft.setTextColor(TFT_WHITE, TFT_BLACK);
+  tft.setCursor(BORDE, 148);
+  tft.print("VEL");
+  tft.setTextSize(3);
+  tft.setCursor(BORDE, 163);
+  tft.printf("%-6.1f kph", vel_kph);
+
+  // distance
+  tft.setTextSize(2);
+  tft.setTextColor(TFT_GREEN, TFT_BLACK);
+  tft.setCursor(BORDE, 210);
+  tft.print("DIST");
+  tft.setTextSize(3);
+  tft.setCursor(BORDE, 225);
+  tft.printf("%-7.2f km", dist_km);
 }

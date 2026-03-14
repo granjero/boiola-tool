@@ -17,6 +17,7 @@
 #include "pantalla.h"
 #include "boiola_sd.h"
 #include "boiola_web.h"
+#include "boiola_trip.h"
 #include "touch.h"
 #include "icons.h"
 
@@ -26,7 +27,8 @@ enum Estado_BOIOLA {
   MENU0,
   GPS_DATA,
   GPX_SERVER,
-  TRIP,
+  TRIP_MENU,
+  TRIP_ACTIVE,
 };
 
 Estado_BOIOLA estado_actual_app = IDLE;
@@ -44,7 +46,12 @@ TouchPoint toque;
 PropiedadesBoton botonOnOffPantalla = { 200, 290, 40, 30, nullptr, 0 };
 PropiedadesBoton botonMenu0 = { 70, 100, 100, 50, set_estado_actual_app, MENU0 };
 
-PropiedadesBoton botonMenu1 = { 40, 60, 60, 80, set_estado_actual_app, TRIP };
+PropiedadesBoton botonMenu1 = { 40, 60, 60, 80, set_estado_actual_app, TRIP_MENU };
+
+PropiedadesBoton botonTripBici   = { 40,  60, 60, 80, nullptr, 0 };
+PropiedadesBoton botonTripTren   = { 140, 60, 60, 80, nullptr, 0 };
+PropiedadesBoton botonTripViaje  = { 40, 180, 60, 80, nullptr, 0 };
+PropiedadesBoton botonTripVolver = { 140, 180, 60, 80, set_estado_actual_app, MENU0 };
 PropiedadesBoton botonMenu2 = { 140, 60, 60, 80, set_estado_actual_app, GPS_DATA };
 PropiedadesBoton botonMenu3 = { 40, 180, 60, 80, set_estado_actual_app, GPX_SERVER };
 PropiedadesBoton botonMenu4 = { 140, 180, 60, 80, set_estado_actual_app, IDLE };
@@ -113,7 +120,7 @@ void loop() {
         // dibujaBoton(botonMenu0, TFT_CYAN);
         if (touch_OK(toque.x, toque.y, botonMenu0)) {
           botonMenu0.action(botonMenu0.estado_app);
-          pantalla_setup_menu0(tft);
+          pantalla_setup_menu0(tft, trip_is_active());
         }
       }
       break;
@@ -123,11 +130,18 @@ void loop() {
       pantalla_icono_gps(tft, gps);
       pantalla_icono_sd(tft, sd_estado());
 
-      // TRIP
+      // TRIP / FIN TRIP
       if (touch_OK(toque.x, toque.y, botonMenu1)) {
-        botonMenu1.action(botonMenu1.estado_app);
-        tft.fillScreen(TFT_BLACK);
-        pantalla_divisor_botones(tft);
+        if (trip_is_active()) {
+          trip_terminar();
+          sd_close_track();
+          set_estado_actual_app(IDLE);
+          pantalla_setup(tft);
+          pantalla_img_jpg(tft, TJpgDec);
+        } else {
+          set_estado_actual_app(TRIP_MENU);
+          pantalla_setup_trip_menu(tft);
+        }
       }
 
       // GPS DATA
@@ -196,10 +210,56 @@ void loop() {
       break;
 
 
-    case TRIP:
-      tft.setCursor(30, 100);
-      tft.setTextSize(3);
-      tft.print("TRIPEANDO");
+    case TRIP_MENU:
+      pantalla_icono_server_wifi(tft, web_is_running());
+      pantalla_icono_gps(tft, gps);
+      pantalla_icono_sd(tft, sd_estado());
+
+      if (touch_OK(toque.x, toque.y, botonTripBici)) {
+        trip_iniciar(VIAJE_BICICLETA, gps);
+        set_estado_actual_app(TRIP_ACTIVE);
+        pantalla_setup(tft);
+      }
+      if (touch_OK(toque.x, toque.y, botonTripTren)) {
+        trip_iniciar(VIAJE_TREN, gps);
+        set_estado_actual_app(TRIP_ACTIVE);
+        pantalla_setup(tft);
+      }
+      if (touch_OK(toque.x, toque.y, botonTripViaje)) {
+        trip_iniciar(VIAJE_GENERICO, gps);
+        set_estado_actual_app(TRIP_ACTIVE);
+        pantalla_setup(tft);
+      }
+      if (touch_OK(toque.x, toque.y, botonTripVolver)) {
+        set_estado_actual_app(MENU0);
+        pantalla_setup_menu0(tft, false);
+      }
+      break;
+
+    case TRIP_ACTIVE:
+      if (gps.location.isUpdated()) {
+        trip_update(gps);
+      }
+      if (pantalla_encendida()) {
+        uint8_t hh, mm, ss;
+        trip_get_cronometro(hh, mm, ss);
+        char nombre_viaje[32];
+        trip_get_track_name(nombre_viaje, sizeof(nombre_viaje));
+
+        pantalla_fecha_y_hora(tft, gps);
+        pantalla_icono_server_wifi(tft, web_is_running());
+        pantalla_icono_gps(tft, gps);
+        pantalla_icono_sd(tft, sd_estado());
+        pantalla_trip_activo(tft, hh, mm, ss,
+                             trip_get_velocidad_kph(gps),
+                             trip_get_distancia_km(),
+                             nombre_viaje);
+
+        if (touch_OK(toque.x, toque.y, botonMenu0)) {
+          botonMenu0.action(botonMenu0.estado_app);
+          pantalla_setup_menu0(tft, true);
+        }
+      }
       break;
   }
 }

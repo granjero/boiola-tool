@@ -28,11 +28,12 @@ struct EstadoGPX {
   bool segmento_abierto;
   char filename[32];
   char track_name[32];
+  char track_extension_type[16];
   TrkptBuffer buffer[BUFFER_SIZE];
   uint8_t buffer_count;
 };
 
-static EstadoGPX estado_gpx = { false, false, false, "/boiola.boot", "BOIOLA-TOOL", {}, 0 };
+static EstadoGPX estado_gpx = { false, false, false, "/boiola.boot", "BOIOLA-TOOL", "", {}, 0 };
 static Chrono sd_gpx_interval(Chrono::SECONDS);
 static Chrono sd_flush_interval(Chrono::SECONDS);
 static bool estadoSD = false;
@@ -100,6 +101,13 @@ bool sd_file_track_open() {
   archivo.print("    <name>");
   archivo.print(estado_gpx.track_name);
   archivo.println("</name>");
+  if (strlen(estado_gpx.track_extension_type) > 0) {
+    archivo.println("    <extensions>");
+    archivo.print("      <boiola:type>");
+    archivo.print(estado_gpx.track_extension_type);
+    archivo.println("</boiola:type>");
+    archivo.println("    </extensions>");
+  }
   archivo.close();
 
   estado_gpx.track_abierto = true;
@@ -293,6 +301,22 @@ bool sd_set_filename(TinyGPSPlus &gps) {
 
 void sd_set_track_name(const char *name) {
   snprintf(estado_gpx.track_name, sizeof(estado_gpx.track_name), "%s", name);
+}
+
+void sd_set_track_extension(const char *type) {
+  snprintf(estado_gpx.track_extension_type, sizeof(estado_gpx.track_extension_type), "%s", type);
+}
+
+bool sd_close_track() {
+  sd_buffer_flush_to_sd();
+  sd_file_segment_close();
+  sd_file_track_close();
+  // re-open default track so continuous logging resumes
+  sd_set_track_name("BOIOLA-TOOL");
+  sd_set_track_extension("");
+  sd_file_track_open();
+  sd_file_segment_open();
+  return true;
 }
 
 void sd_buffer_trkpt(TinyGPSPlus &gps, const char *name, const char *desc) {
